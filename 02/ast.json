@@ -1,0 +1,20 @@
+[
+  { "tag": "true" },
+  { "tag": "false" },
+  { "tag": "number" },
+  { "tag": "add",
+    "left": {
+      "tag": "number",
+      "n": 1
+    },
+    "right": {
+      "tag": "number",
+      "n": 2
+    }
+  },
+  { "tag": "if",
+    "cond": {},
+    "thn": {},
+    "els": {}
+  }
+]
