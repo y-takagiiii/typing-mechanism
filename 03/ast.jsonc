@@ -1,0 +1,22 @@
+[
+  // 変数参照を表現
+  { "tag": "var" },
+  // (n: number, b: boolean) => 1のような無名関数を表現
+  {
+    "tag": "func",
+    "params": [
+      { "name": "n", "type": { "tag": "Number" }},
+      { "name": "b", "type": { "tag": "Boolean" }}
+    ],
+    "body": { "tag": "number", "n": 1}
+  },
+  // function(1, 2)のような関数呼び出しを表現
+  {
+    "tag": "call",
+    "func": { "tag": "var", "name": "f" },
+    "args": [
+      { "tag": "number", "n": 1 },
+      { "tag": "number", "n": 2 }
+    ]
+  }
+]
