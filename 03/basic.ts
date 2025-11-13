@@ -14,7 +14,8 @@ type Term =
 
 type Type =
   | { tag: "Boolean" }
-  | { tag: "Number" };
+  | { tag: "Number" }
+  | { tag: "Func"; params: Param[]; retType: Type };
 
 type Param = { name: string; type: Type };
 
