@@ -58,6 +58,20 @@ function typecheck(t: Term, tyEnv: TypeEnv): Type {
       }
       const retType = typecheck(t.body, newTyEnv);
       return { tag: "Func", params: t.params, retType };
+    case "call": {
+      const funcTy = typecheck(t.func, tyEnv);
+      if (funcTy.tag !== "Func") throw new Error("function type expected");
+      if (funcTy.params.length !== t.args.length) {
+        throw new Error("wrong number of arguments");
+      }
+      for (let i = 0; i < t.args.length; i++) {
+        const argTy = typecheck(t.args[i], tyEnv);
+        if (!typeEq(argTy, funcTy.params[i].type)) {
+          throw new Error("parameter type mismatch");
+        }
+      }
+      return funcTy.retType;
+    }
     default:
       throw new Error("not implemented yet")
   }
@@ -83,5 +97,5 @@ function typeEq(ty1: Type, ty2: Type): boolean {
   }
 }
 
-console.log(typecheck(parseBasic("(x: boolean) => 42"), {}));
-console.log(typecheck(parseBasic("(x: number) => x"), {}));
+console.dir(typecheck(parseBasic("(x: number) => x"), {}), {depth: null});
+console.dir(typecheck(parseBasic("((x: number) => x)(42)"), {}), {depth: null});
