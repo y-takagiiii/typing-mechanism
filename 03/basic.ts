@@ -19,7 +19,10 @@ type Type =
 
 type Param = { name: string; type: Type };
 
-function typecheck(t: Term): Type {
+// 変数が現在どういう型を持っているかを管理する
+type TypeEnv = Record<string, Type>;
+
+function typecheck(t: Term, tyEnv: TypeEnv): Type {
   switch (t.tag) {
     case "true":
       return { tag: "Boolean" }
@@ -28,22 +31,28 @@ function typecheck(t: Term): Type {
     case "number":
       return { tag: "Number" }
     case "add": {
-      const leftType = typecheck(t.left);
+      const leftType = typecheck(t.left, tyEnv);
       if (leftType.tag !== "Number") throw "number expected";
-      const rightType = typecheck(t.right);
+      const rightType = typecheck(t.right, tyEnv);
       if (rightType.tag !== "Number") throw "number expected";
       return { tag: "Number" };
     }
     case "if": {
-      const condType = typecheck(t.cond);
+      const condType = typecheck(t.cond, tyEnv);
       if (condType.tag !== "Boolean") throw "boolean expected"
-      const thnType = typecheck(t.thn);
-      const elsType = typecheck(t.els);
+      const thnType = typecheck(t.thn, tyEnv);
+      const elsType = typecheck(t.els, tyEnv);
       if (thnType.tag !== elsType.tag) {
         throw "then and else have different types"
       }
       return thnType;
     }
+    case "var":
+      if (tyEnv[t.name] === undefined)
+        throw new Error(`unknown variable: ${t.name}`);
+      return tyEnv[t.name];
+    default:
+      throw new Error("not implemented yet")
   }
 }
 
@@ -66,5 +75,3 @@ function typeEq(ty1: Type, ty2: Type): boolean {
     }
   }
 }
-
-console.log(typecheck(parseArith("1 ? true : false"))); // => { tag: "Boolean" }
