@@ -1,4 +1,4 @@
-import { parseArith } from "tiny-ts-parser";
+import { parseArith, parseBasic } from "tiny-ts-parser";
 
 type Term =
   | { tag: "true" }
@@ -51,6 +51,9 @@ function typecheck(t: Term, tyEnv: TypeEnv): Type {
       if (tyEnv[t.name] === undefined)
         throw new Error(`unknown variable: ${t.name}`);
       return tyEnv[t.name];
+    case "func":
+      const retType = typecheck(t.body, tyEnv);
+      return { tag: "Func", params: t.params, retType };
     default:
       throw new Error("not implemented yet")
   }
@@ -75,3 +78,6 @@ function typeEq(ty1: Type, ty2: Type): boolean {
     }
   }
 }
+
+console.log(typecheck(parseBasic("(x: boolean) => 42"), {}));
+console.log(typecheck(parseBasic("(x: number) => x"), {}));
