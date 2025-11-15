@@ -1,0 +1,26 @@
+[
+  // 逐次実行(sequence)を表すデータ構造
+  // まずbodyの項を実行し、次にrestの項を逐次実行していく
+  {
+    "tag": "seq",
+    "body": { "tag": "number", "n": 1 },
+    "rest": {
+      "tag": "seq",
+      "body": { "tag": "number", "n": 2 },
+      "rest": {
+        "tag": "seq",
+        "body": { "tag": "number", "n": 3 },
+        "rest": { "tag": "number", "n": 4 }
+      }
+    }
+  },
+  // 変数定義のデータ構造
+  {
+    "tag": "const",
+    "name": "x",
+    "init": { "tag": "number", "n": 1 },
+    // restプロパティはML言語式の考え方
+    // 変数定義が終わった後に評価すべき項を入れておくためのrestプロパティ
+    "rest": { "tag": "var", "name": "x" }
+  }
+]
