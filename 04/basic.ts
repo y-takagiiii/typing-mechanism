@@ -10,6 +10,7 @@ type Term =
   | { tag: "func"; params: Param[]; body: Term }
   | { tag: "call"; func: Term; args: Term[] }
   | { tag: "seq"; body: Term; rest: Term }
+  // tag: "const" name: "変数名" init: "変数に初期値として入れる項" rest: "変数定義が終わった後に評価すべき後続の項"
   | { tag: "const"; name: string; init: Term; rest: Term };
 
 type Type =
@@ -19,6 +20,7 @@ type Type =
 
 type Param = { name: string; type: Type };
 
+// 変数が現在どういう型を持っているかを管理する
 type TypeEnv = Record<string, Type>;
 
 function typecheck(t: Term, tyEnv: TypeEnv): Type {
@@ -73,11 +75,11 @@ function typecheck(t: Term, tyEnv: TypeEnv): Type {
     }
     case "seq":
       typecheck(t.body, tyEnv);
-      return typecheck(t.rest, tyEnv);
+      return typecheck(t.rest, tyEnv); // 現在のノードの型チェックは実行するが、子ノードの最後の型を逐次実行全体の結果として返すため、現在のノードの型チェックの結果は破棄される。つまり、途中の処理は型チェックのみ行い、最終的な式の型チェックの結果を逐次実行プログラム全体の型とする
     case "const": {
-      const ty = typecheck(t.init, tyEnv);
-      const newTyEnv = { ...tyEnv, [t.name]: ty };
-      return typecheck(t.rest, newTyEnv);
+      const ty = typecheck(t.init, tyEnv); // t.initの型を取得する
+      const newTyEnv = { ...tyEnv, [t.name]: ty }; // 現在の型環境に変数名(t.name)とその型(ty)を追加して更新
+      return typecheck(t.rest, newTyEnv); // 後続の項を新しい型環境で型チェックする
     }
   }
 }
