@@ -1,0 +1,27 @@
+[
+  // オブジェクト生成を表すデータ構造
+  // { foo: 1, bar: true }のようなオブジェクト
+  {
+    "tag": "objectNew",
+    "props": [
+      {
+        "name": "foo",
+        "term": { "tag": "number", "n": 1 }
+      },
+      {
+        "name": "bar",
+        "term": { "tag": true }
+      }
+    ]
+  },
+  // プロパティ呼び出しを表すデータ構造
+  // x.foo
+  {
+    "tag": "objectNew",
+    "obj": {
+      "tag": "var",
+      "name": "x"
+    },
+    "propName": "foo"
+  }
+]
