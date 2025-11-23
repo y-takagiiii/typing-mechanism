@@ -18,13 +18,15 @@ type Type =
   | { tag: "Boolean" }
   | { tag: "Number" }
   | { tag: "Func"; params: Param[]; retType: Type }
-  | { tag: "Object"; props: PropertyTerm[ ]}; // Object型を追加
+  | { tag: "Object"; props: PropertyType[ ]}; // Object型を追加
 
 type Param = { name: string; type: Type };
 
 type TypeEnv = Record<string, Type>;
 
-type PropertyTerm = { name: string; type: Type }; // オブジェクトのプロパティを表す型
+type PropertyTerm = { name: string; term: Term }; // オブジェクトの項を表現する型
+
+type PropertyType = { name: string; type: Type };  // プロパティの型
 
 function typecheck(t: Term, tyEnv: TypeEnv): Type {
   switch (t.tag) {
@@ -83,6 +85,18 @@ function typecheck(t: Term, tyEnv: TypeEnv): Type {
       const ty = typecheck(t.init, tyEnv);
       const newTyEnv = { ...tyEnv, [t.name]: ty };
       return typecheck(t.rest, newTyEnv);
+    }
+    // オブジェクト生成の型チェック
+    case "objectNew": {
+      // 省略記法
+      // const props = t.props.map(({name, term}) => ({
+      //   name, type: typecheck(term, tyEnv)
+      // }));
+      // 全てのプロパティの型をチェックして、それらの結果をまとめて返す
+      const props = t.props.map((prop) => ({
+        name: prop.name, type: typecheck(prop.term, tyEnv)
+      }));
+      return { tag: "Object", props };
     }
   }
 }
