@@ -1,4 +1,4 @@
-import { error, parseArith, parseBasic } from "tiny-ts-parser";
+import { error, parseObj } from "tiny-ts-parser";
 
 type Term =
   | { tag: "true" }
@@ -18,7 +18,7 @@ type Type =
   | { tag: "Boolean" }
   | { tag: "Number" }
   | { tag: "Func"; params: Param[]; retType: Type }
-  | { tag: "Object"; props: PropertyType[ ]}; // Object型を追加
+  | { tag: "Object"; props: PropertyType[] }; // Object型を追加
 
 type Param = { name: string; type: Type };
 
@@ -98,6 +98,16 @@ function typecheck(t: Term, tyEnv: TypeEnv): Type {
       }));
       return { tag: "Object", props };
     }
+    // プロパティ読み出しの型チェック
+    case "objectGet": {
+      // 対象の項がオブジェクト型かチェック
+      const objectTy = typecheck(t.obj, tyEnv);
+      if (objectTy.tag !== "Object") error("object type expected", t.obj);
+      // 対象の項のプロパティに読み出そうとしているプロパティがあるかチェック
+      const prop = objectTy.props.find((prop) => prop.name === t.propName);
+      if (!prop) error(`unknown property name: ${t.propName}`, t);
+      return prop.type;
+    }
   }
 }
 
@@ -132,26 +142,11 @@ function typeEq(ty1: Type, ty2: Type): boolean {
   }
 }
 
-console.dir(typecheck(parseBasic(`
-  const add = (x: number, y: number) => x + y;
-  const select = (b: boolean, x: number, y: number) => b ? x : y;
-  
-  const x = add(1, add(2, 3));
-  const y = select(true, x, x);
+console.log(typecheck(parseObj(`
+  const x = { foo: 1, bar: true };
+  x.foo; 
+`), {}));
 
-  y;
-`), {}), {depth: null}, );
-
-console.dir(typecheck(parseBasic(`
-  const add = (x: number, y: number) => x + y;
-  add(1, 2)
-`), {}), {depth: null})
-
-console.dir(typecheck(parseBasic(`
-  const x = 3;
-  const y = 4;
-  const add = (x: number, y: number) => x + y;
-
-  add(x, add(x, y))
-`), {}), {depth: null})
-
+console.dir(typecheck(parseObj(`
+  const x = { foo: 1, bar: true };
+`), {}), { depth: null });
