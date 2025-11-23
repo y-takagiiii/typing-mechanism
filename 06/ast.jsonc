@@ -1,0 +1,29 @@
+// function f(x: number): number {
+//   return f(x);
+//   f;
+// } のような再帰関数のデータ構造
+{
+  "tag": "recFunc", // 再帰関数用タグ
+  "funcName": "f", // 再帰関数の名前
+  "params": [
+    { "name": "x", "type": { "tag": "Number" }}
+  ], // 再帰関数の仮引数(通常関数と同様)
+  "retType": { "tag": "Number" }, // 返り値の型
+  "body": {
+    "tag": "call",
+    "func": {
+      "tag": "var",
+      "name": "f"
+    },
+    "args": [
+      {
+        "tag": "var",
+        "name": "x"
+      }
+    ]
+  }, // 関数本体(通常関数と同様)
+  "rest": {
+    "tag": "var",
+    "name": "f"
+  } // f;
+}
