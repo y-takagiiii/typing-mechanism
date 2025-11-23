@@ -24,7 +24,7 @@ type Param = { name: string; type: Type };
 
 type TypeEnv = Record<string, Type>;
 
-type PropertyTerm = { name: string; term: Term }; // オブジェクトのプロパティを表す型
+type PropertyTerm = { name: string; type: Type }; // オブジェクトのプロパティを表す型
 
 function typecheck(t: Term, tyEnv: TypeEnv): Type {
   switch (t.tag) {
@@ -100,6 +100,19 @@ function typeEq(ty1: Type, ty2: Type): boolean {
         if (!typeEq(ty1.params[i].type, ty2.params[i].type)) return false;
       }
       if (!typeEq(ty1.retType, ty2.retType)) return false;
+      return true;
+    }
+    case "Object": {
+      // 比較対象オブジェクトのtagが"Object"であるかチェック
+      if (ty1.tag !== "Object") return false;
+      // 比較対象オブジェクトのプロパティ数が一致しているかチェック
+      if (ty1.props.length !== ty2.props.length) return false;
+      // 比較対象オブジェクトのプロパティの型が一致しているかチェック
+      for (const prop2 of ty2.props) {
+        const prop1 = ty1.props.find((prop1) => prop1.name === prop2.name);
+        if (!prop1) return false;
+        if (!typeEq(prop1.type, prop2.type)) return false;
+      }
       return true;
     }
   }
