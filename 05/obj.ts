@@ -17,13 +17,14 @@ type Term =
 type Type =
   | { tag: "Boolean" }
   | { tag: "Number" }
-  | { tag: "Func"; params: Param[]; retType: Type };
+  | { tag: "Func"; params: Param[]; retType: Type }
+  | { tag: "Object"; props: PropertyTerm[ ]}; // Object型を追加
 
 type Param = { name: string; type: Type };
 
 type TypeEnv = Record<string, Type>;
 
-type PropertyTerm = { name: string; term: Term };
+type PropertyTerm = { name: string; term: Term }; // オブジェクトのプロパティを表す型
 
 function typecheck(t: Term, tyEnv: TypeEnv): Type {
   switch (t.tag) {
