@@ -1,4 +1,4 @@
-import { error, parseObj } from "tiny-ts-parser";
+import { error, parseObj, parseRecFunc } from "tiny-ts-parser";
 
 type Term =
   | { tag: "true" }
@@ -100,6 +100,20 @@ function typecheck(t: Term, tyEnv: TypeEnv): Type {
       if (!prop) error(`unknown property name: ${t.propName}`, t);
       return prop.type;
     }
+    // 通常の関数では仮引数を型環境に追加し、その型環境を使って関数定義の本体(body)を型チェックしていた
+    // 再帰関数ではこれに加えて返り値の型チェックと、後続の項t.restの型チェックが必要
+    case "recFunc": {
+      const funcTy: Type = { tag: "Func", params: t.params, retType: t.retType }; // 手動で型環境に関数自身の型を含める
+      const newTyEnv = { ...tyEnv };
+      for (const { name, type } of t.params) {
+        newTyEnv[name] = type;
+      }
+      newTyEnv[t.funcName] = funcTy;
+      const retType = typecheck(t.body, newTyEnv);
+      if (!typeEq(t.retType, retType)) error("wrong return type", t);
+      const newTyEnv2 = { ...tyEnv, [t.funcName]: funcTy }; // tyEnvとは別に定義された関数の型のみを追加した型環境を用意
+      return typecheck(t.rest, newTyEnv2);
+    }
   }
 }
 
@@ -131,4 +145,7 @@ function typeEq(ty1: Type, ty2: Type): boolean {
   }
 }
 
+console.log(typecheck(parseRecFunc(`
+function f(x: number): number { return f(x); }; f
+`), {}));
 
